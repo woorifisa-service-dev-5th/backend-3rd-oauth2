@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: WooriServer
+  datasource:
+    url: jdbc:mysql://localhost:3306/oauth
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+
+oauth:
+  grant_type: authorization_code
+  client_id: oauth2-client-app
+  client_secret: secret
+  redirect_uri: http://127.0.0.1:8081
