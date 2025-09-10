@@ -30,10 +30,19 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
+        // 기존 'user' 사용자
         var user = User.withUsername("user")
                 .password("{noop}1234")
                 .roles("USER")
                 .build();
-        return new InMemoryUserDetailsManager(user);
+
+
+        var testUser = User.withUsername("test")
+                .password("{noop}1234")
+                .roles("USER")
+                .build();
+
+        // 두 사용자를 모두 InMemoryUserDetailsManager에 등록
+        return new InMemoryUserDetailsManager(user, testUser);
     }
 }

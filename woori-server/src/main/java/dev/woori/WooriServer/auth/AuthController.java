@@ -17,20 +17,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestParam("code") String code) {
         String accessToken = authService.getAccessToken(code);
-        // 프론트엔드에서 다루기 쉽도록 JSON 형태로 반환
         return ResponseEntity.ok(Map.of("accessToken", accessToken));
     }
 
     @GetMapping("/user")
     public ResponseEntity<UserInfoResponse> getUserInfo(Authentication authentication) {
         if (authentication instanceof TokenAuthentication) {
-            TokenAuthentication tokenAuth = (TokenAuthentication) authentication;
-            // JwtFilter에서 가져온 사용자 정보를 UserInfoResponse 형태로 반환
-            UserInfoResponse userInfo = new UserInfoResponse(
-                    "temp-sub", // 필요하다면 이 값도 UserInfo에서 가져오도록 수정
-                    tokenAuth.getCredentials(),
-                    tokenAuth.getName()
-            );
+            // 인증 객체에서 완전한 UserInfoResponse를 가져와 반환합니다.
+            UserInfoResponse userInfo = ((TokenAuthentication) authentication).getUserInfo();
             return ResponseEntity.ok(userInfo);
         }
         return ResponseEntity.status(401).build();

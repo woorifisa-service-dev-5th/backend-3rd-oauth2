@@ -28,6 +28,8 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -45,22 +47,46 @@ public class ServerConfig {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-
-        // 인가 서버 구성을 위한 기본 설정요소들 초기화
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
-        // UserInfo 응답에 추가 claim 설정
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(oidc -> {
-            oidc.userInfoEndpoint(userInfo -> userInfo.userInfoMapper(context -> {
-                String user = context.getAuthorization().getPrincipalName();
-                String username = "gugu";
-                return new OidcUserInfo(Map.of(
-                        "sub", user,
-                        "name", username,
-                        "email", username + "@example.com"
-                ));
-            }));
-        });
+        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
+                .oidc(oidc -> oidc
+                                .userInfoEndpoint(userInfo -> userInfo
+                                        // --- 여기가 1번 수정 지점입니다 ---
+                                        .userInfoMapper(context -> {
+                                            // 인증된 사용자의 아이디(username)를 올바르게 가져옵니다.
+                                            String principalName = context.getAuthorization().getPrincipalName();
+
+                                            Map<String, Object> claims = new HashMap<>();
+
+                                            if ("test".equals(principalName)) {
+                                                claims.put("sub", principalName);
+                                                claims.put("name", "jonghyuck");
+                                                claims.put("email", "jhcki222@gmail.com");
+                                            } else { // "user" 또는 다른 사용자의 경우
+                                                claims.put("sub", principalName);
+                                                claims.put("name", "gugu");
+                                                claims.put("email", "gugu@example.com");
+                                            }
+
+                                            return new OidcUserInfo(claims);
+                                        })
+                                )
+                        );
+//        // UserInfo 응답에 추가 claim 설정
+//        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(oidc -> {
+//            oidc.userInfoEndpoint(userInfo -> userInfo.userInfoMapper(context -> {
+//                String user = context.getAuthorization().getPrincipalName();
+//                String username = "gugu";
+//                return new OidcUserInfo(Map.of(
+//                        "sub", user,
+//                        "name", username,
+//                        "email", username + "@example.com"
+//                ));
+//
+//            }));
+//        });
+
 
 //        http.exceptionHandling(exception -> exception.(new LoginUrlAuthenticationEntryPoint("/login")));
         http.exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
@@ -106,9 +132,17 @@ public class ServerConfig {
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
         return context -> {
-            if (context.getPrincipal() != null) {
-                String username = "gugu"; // 로그인한 사용자 이름
-                context.getClaims().claim("name", username);
+            Authentication principal = context.getPrincipal();
+            if (principal != null && principal.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) principal.getPrincipal();
+                String username = userDetails.getUsername(); // 실제 로그인한 사용자 아이디
+
+                // 로그인한 사용자에 따라 다른 이름을 claim에 추가
+                if ("test".equals(username)) {
+                    context.getClaims().claim("name", "jonghyuck");
+                } else {
+                    context.getClaims().claim("name", "gugu");
+                }
             }
         };
     }

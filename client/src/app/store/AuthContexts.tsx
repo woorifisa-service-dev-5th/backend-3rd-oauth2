@@ -42,9 +42,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     });
                     if (res.ok) {
                         const userData = await res.json();
+
+                        console.log(
+                            'User data received from /api/user:',
+                            userData
+                        );
+
                         setUser(userData);
                     } else {
-                        // 토큰이 유효하지 않은 경우
                         localStorage.removeItem('accessToken');
                         setUser(null);
                     }
