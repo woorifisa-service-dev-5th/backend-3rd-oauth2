@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
-
+import { AuthProvider } from './store/AuthContexts';
 const wooridaum = localFont({
     src: [
         {
@@ -36,7 +36,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang='en' className={`${wooridaum.variable}`}>
-            <body>{children}</body>
+            <body>
+                <AuthProvider>{children}</AuthProvider>
+            </body>
         </html>
     );
 }
