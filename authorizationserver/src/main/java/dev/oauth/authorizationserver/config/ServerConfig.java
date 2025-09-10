@@ -117,7 +117,7 @@ public class ServerConfig {
                     .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                     .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                     .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                    .redirectUri("http://127.0.0.1:8081/auth/callback")
+                    .redirectUri("http://localhost:3000/auth/callback")
 //                .redirectUri("http://127.0.0.1:8081/login/oauth2/code/oauth2-client-app")
                     .scope(OidcScopes.OPENID)
                     .scope("read")

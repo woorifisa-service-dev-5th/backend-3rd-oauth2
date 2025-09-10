@@ -20,6 +20,6 @@ oauth:
   grant_type: authorization_code
   client_id: oauth2-client-app
   client_secret: secret
-  redirect_uri: http://127.0.0.1:3000/auth/callback
+  redirect_uri: http://localhost:3000/auth/callback
   auth_server_ip: http://localhost:9000
   resource_server_ip: http://localhost:8081

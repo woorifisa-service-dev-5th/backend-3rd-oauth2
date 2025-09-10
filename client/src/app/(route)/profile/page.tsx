@@ -6,20 +6,18 @@ import { useEffect } from 'react';
 import ThreadsBackground from '@/components/bits/Threads/ThreadsBackground';
 
 export default function ProfilePage() {
-    const { user, isAuthenticated, logout } = useAuth();
+    const { user, isLoading, isAuthenticated, logout } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        // user 상태가 확정된 후, 로그인되지 않았다면 홈으로 보냅니다.
-        if (!isAuthenticated) {
-            // Context가 초기화될 시간을 주기 위해 약간의 지연 후 체크할 수 있습니다.
-            // 하지만 이 구조에서는 useEffect가 실행될 때쯤이면 상태가 확정됩니다.
+        // 로딩이 끝나고, 인증되지 않은 상태가 확실할 때만 홈으로 리디렉션합니다.
+        if (!isLoading && !isAuthenticated) {
             router.push('/');
         }
-    }, [isAuthenticated, router]);
+    }, [isLoading, isAuthenticated, router]);
 
-    // 사용자 정보가 아직 로드되지 않았다면 로딩 화면을 보여줍니다.
-    if (!user) {
+    // 로딩 중이거나, (리디렉션 전) 유저가 없을 때 로딩 화면을 보여줍니다.
+    if (isLoading || !user) {
         return (
             <div className='flex items-center justify-center h-screen bg-black text-white'>
                 <p>프로필 정보를 로딩 중입니다...</p>
@@ -44,7 +42,7 @@ export default function ProfilePage() {
                             <label className='text-sm font-semibold text-gray-400'>
                                 사용자 ID (sub)
                             </label>
-                            <p className='p-3 bg-black/20 rounded-md mt-1'>
+                            <p className='p-3 bg-black/20 rounded-md mt-1 break-words'>
                                 {user.sub}
                             </p>
                         </div>
@@ -52,7 +50,7 @@ export default function ProfilePage() {
                             <label className='text-sm font-semibold text-gray-400'>
                                 이메일
                             </label>
-                            <p className='p-3 bg-black/20 rounded-md mt-1'>
+                            <p className='p-3 bg-black/20 rounded-md mt-1 break-words'>
                                 {user.email}
                             </p>
                         </div>
@@ -60,18 +58,28 @@ export default function ProfilePage() {
                             <label className='text-sm font-semibold text-gray-400'>
                                 이름
                             </label>
-                            <p className='p-3 bg-black/20 rounded-md mt-1'>
+                            <p className='p-3 bg-black/20 rounded-md mt-1 break-words'>
                                 {user.name}
                             </p>
                         </div>
                     </div>
 
-                    <button
-                        onClick={logout}
-                        className='w-full mt-8 rounded-full text-sm hover:text-white bg-red-500/80 hover:bg-red-500 py-3 font-bold transition-colors'
-                    >
-                        로그아웃
-                    </button>
+                    {/* --- 여기가 수정된 버튼 영역입니다 --- */}
+                    <div className='flex items-center gap-4 mt-8'>
+                        <button
+                            onClick={() => router.push('/')}
+                            className='w-full rounded-full bg-gray-500/80 py-3 text-sm font-bold text-white transition-colors hover:bg-gray-500/100'
+                        >
+                            뒤로 가기
+                        </button>
+                        <button
+                            onClick={logout}
+                            className='w-full rounded-full bg-red-500/80 py-3 text-sm font-bold text-white transition-colors hover:bg-red-500/100'
+                        >
+                            로그아웃
+                        </button>
+                    </div>
+                    {/* ------------------------------------ */}
                 </div>
             </div>
         </main>
